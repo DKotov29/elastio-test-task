@@ -1,5 +1,5 @@
 use crate::provider::ProviderCreationError::NotImplemented;
-use crate::provider::ProviderUsingError::{Get};
+use crate::provider::ProviderUsingError::Get;
 use crate::Provider::{OpenWeather, WeatherApi};
 use reqwest::Error;
 use serde_json::Value;
@@ -63,7 +63,9 @@ impl Provider {
                 let response_status = response.status();
                 let value = response.json::<Value>()?;
                 if !response_status.is_success() {
-                    return Err(ProviderUsingError::BadResponse(value["message"].to_string()));
+                    return Err(ProviderUsingError::BadResponse(
+                        value["message"].to_string(),
+                    ));
                 }
                 Ok(WeatherData {
                     temp_c: value["current"]["temp_c"].as_f64().unwrap(),
@@ -80,7 +82,9 @@ impl Provider {
                 let mut response_status = response.status();
                 let mut value = response.json::<Value>()?;
                 if !response_status.is_success() {
-                    return Err(ProviderUsingError::BadResponse(value["message"].to_string()));
+                    return Err(ProviderUsingError::BadResponse(
+                        value["message"].to_string(),
+                    ));
                 }
                 response = reqwest::blocking::get(format!(
                     "https://api.openweathermap.org/data/2.5/onecall?lat={}&lon={}&units=metric&exclude=hourly,daily&appid={}",
@@ -89,7 +93,9 @@ impl Provider {
                 response_status = response.status();
                 value = response.json::<Value>()?;
                 if !response_status.is_success() {
-                    return Err(ProviderUsingError::BadResponse(value["message"].to_string()));
+                    return Err(ProviderUsingError::BadResponse(
+                        value["message"].to_string(),
+                    ));
                 }
                 Ok(WeatherData {
                     temp_c: value["current"]["temp"].as_f64().unwrap() as f64,

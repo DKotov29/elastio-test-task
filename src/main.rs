@@ -55,13 +55,11 @@ fn main() {
                             println!("{:?}", err);
                         }
                     }
-
                 }
                 Err(e) => {
                     println!("{:?}", e)
                 }
             }
-
         }
         _ => println!("unpredictable move"),
     };
