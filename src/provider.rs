@@ -9,10 +9,12 @@ pub enum Provider {
     WeatherApi { api_key: String },
     OpenWeather { api_key: String },
 }
+
 #[derive(Debug)]
 pub enum ProviderCreationError {
     NotImplemented,
 }
+
 #[derive(Debug)]
 pub enum ProviderUsingError {
     Get(Error),
@@ -30,7 +32,7 @@ impl Display for WeatherData {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         writeln!(f, "temperature: {}", self.temp_c)?;
         writeln!(f, "wind in kph: {}", self.wind_kph)?;
-        writeln!(f, "hunidity: {}%", self.humidity_percent)?;
+        writeln!(f, "humidity: {}%", self.humidity_percent)?;
         writeln!(f, "cloud cover: {}%", self.clouds_percent)
     }
 }
@@ -44,13 +46,14 @@ impl From<Error> for ProviderUsingError {
 impl TryFrom<(String, String)> for Provider {
     type Error = ProviderCreationError;
     fn try_from((provider, api_key): (String, String)) -> Result<Provider, ProviderCreationError> {
-        match provider.as_str() {
-            "OpenWeather" => Ok(OpenWeather { api_key }),
-            "WeatherApi" => Ok(WeatherApi { api_key }),
+        match provider.to_lowercase().as_str() {
+            "openweather" => Ok(OpenWeather { api_key }),
+            "weatherapi" => Ok(WeatherApi { api_key }),
             _ => Err(NotImplemented),
         }
     }
 }
+const BAD_MSG: &str = "if you see this, we have problem with retrieved data. maybe api was changed, so you can contact dev";
 
 impl Provider {
     pub fn get(&self, address: String) -> Result<WeatherData, ProviderUsingError> {
@@ -68,10 +71,10 @@ impl Provider {
                     ));
                 }
                 Ok(WeatherData {
-                    temp_c: value["current"]["temp_c"].as_f64().unwrap(),
-                    wind_kph: value["current"]["wind_kph"].as_f64().unwrap(),
-                    humidity_percent: value["current"]["humidity"].as_u64().unwrap() as u8,
-                    clouds_percent: value["current"]["cloud"].as_u64().unwrap() as u8,
+                    temp_c: value["current"]["temp_c"].as_f64().expect(""),
+                    wind_kph: value["current"]["wind_kph"].as_f64().expect(BAD_MSG),
+                    humidity_percent: value["current"]["humidity"].as_u64().expect(BAD_MSG) as u8,
+                    clouds_percent: value["current"]["cloud"].as_u64().expect(BAD_MSG) as u8,
                 })
             }
             OpenWeather { api_key } => {
@@ -98,10 +101,10 @@ impl Provider {
                     ));
                 }
                 Ok(WeatherData {
-                    temp_c: value["current"]["temp"].as_f64().unwrap() as f64,
-                    wind_kph: value["current"]["wind_speed"].as_f64().unwrap(),
-                    humidity_percent: value["current"]["humidity"].as_u64().unwrap() as u8,
-                    clouds_percent: value["current"]["clouds"].as_u64().unwrap() as u8,
+                    temp_c: value["current"]["temp"].as_f64().expect(BAD_MSG),
+                    wind_kph: value["current"]["wind_speed"].as_f64().expect(BAD_MSG),
+                    humidity_percent: value["current"]["humidity"].as_u64().expect(BAD_MSG) as u8,
+                    clouds_percent: value["current"]["clouds"].as_u64().expect(BAD_MSG) as u8,
                 })
             }
         }
