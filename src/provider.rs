@@ -71,7 +71,7 @@ impl Provider {
                     ));
                 }
                 Ok(WeatherData {
-                    temp_c: value["current"]["temp_c"].as_f64().expect(""),
+                    temp_c: value["current"]["temp_c"].as_f64().expect(BAD_MSG),
                     wind_kph: value["current"]["wind_kph"].as_f64().expect(BAD_MSG),
                     humidity_percent: value["current"]["humidity"].as_u64().expect(BAD_MSG) as u8,
                     clouds_percent: value["current"]["cloud"].as_u64().expect(BAD_MSG) as u8,
